@@ -1,0 +1,10 @@
+flask
+flask-cors
+flask-sqlalchemy
+flask-jwt-extended
+scikit-learn
+numpy
+pandas
+werkzeug
+python-dotenv
+openai
