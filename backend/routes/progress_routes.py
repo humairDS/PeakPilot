@@ -5,6 +5,7 @@ import json
 from models.progress import Progress
 from flask_jwt_extended import jwt_required,get_jwt_identity
 from datetime import datetime 
+from utils.validatores import validate_profile
 
 progress_bp = Blueprint("progress", __name__)
 
@@ -13,7 +14,17 @@ progress_bp = Blueprint("progress", __name__)
 @progress_bp.route("/progress", methods=["POST"])
 @jwt_required()
 def add_progress():
+
     data = request.json
+
+    error = validate_profile(data.get("weight"))
+
+    if error:
+        return jsonify({
+            "success": False,
+            "message": error
+        }), 400
+    
     user_id = int(get_jwt_identity())
 
     today = datetime.utcnow().date()

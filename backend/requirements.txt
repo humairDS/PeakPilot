@@ -9,3 +9,4 @@ werkzeug
 python-dotenv
 openai
 google-genai
+Flask-Migrate

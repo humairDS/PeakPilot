@@ -1,6 +1,7 @@
 from flask import Flask, render_template
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
+from flask_migrate import Migrate
 from database.db import db
 from routes.auth import auth_bp
 import os
@@ -36,6 +37,7 @@ app.config['JWT_SECRET_KEY']              = os.environ.get('JWT_SECRET_KEY', 'jw
 # EXTENSIONS
 # =========================
 db.init_app(app)
+migrate= Migrate(app,db)
 JWTManager(app)
 
 # =========================
