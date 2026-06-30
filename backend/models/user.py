@@ -1,5 +1,7 @@
 from database.db import db
 from datetime import datetime
+from models.progress import Progress
+
 
 class User(db.Model):
 
@@ -38,5 +40,12 @@ class User(db.Model):
 
     # Stores the generated AI plan as JSON text
     plan = db.Column(db.Text)
+
+    progress = db.relationship(
+        "Progress",
+        backref="user",
+        lazy=True,
+        cascade="all, delete-orphan"
+    )
 
 

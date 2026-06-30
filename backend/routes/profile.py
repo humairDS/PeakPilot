@@ -36,7 +36,6 @@ def save_profile():
     profile.sleep = data["profile"]["sleep"]
     profile.water = data["profile"]["water"]
 
-    profile.plan = data["plan"]
 
     db.session.commit()
 
@@ -49,9 +48,9 @@ def save_profile():
 @jwt_required()
 def get_profile():
 
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
 
-    profile = User.query.filter_by(user_id=user_id).first()
+    profile = User.query.get_or_404(user_id)
 
     if profile is None:
         return jsonify({
@@ -76,5 +75,4 @@ def get_profile():
             "sleep": profile.sleep,
             "water": profile.water
         },
-        "plan": profile.plan
     })

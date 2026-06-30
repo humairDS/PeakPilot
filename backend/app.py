@@ -6,6 +6,9 @@ from routes.auth import auth_bp
 import os
 from routes.profile import profile_bp
 from routes.ai import ai_bp
+from routes.progress_routes import progress_bp
+from routes.dashboard import dashboard_bp
+from routes.meal_plan import meal_plan_bp
 
 
 
@@ -41,6 +44,9 @@ JWTManager(app)
 app.register_blueprint(auth_bp, url_prefix="/auth")
 app.register_blueprint(profile_bp)
 app.register_blueprint(ai_bp)
+app.register_blueprint(progress_bp)
+app.register_blueprint(dashboard_bp)
+app.register_blueprint(meal_plan_bp)
 # =========================
 # ROUTES
 # =========================
@@ -64,6 +70,10 @@ with app.app_context():
 
     print("Database URI:", app.config["SQLALCHEMY_DATABASE_URI"])
     print("Current working directory:", os.getcwd())
+    from models.user import User
+    from models.plan import Plan
+    from models.progress import Progress
+    from models.meal_plan import MealPlan 
     db.create_all()
 
 # =========================
