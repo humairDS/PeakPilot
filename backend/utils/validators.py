@@ -1,8 +1,10 @@
 def validate_weight(weight):
     if weight is None:
         return "Weight is required."
-
-    if not isinstance(weight, (int, float)):
+    
+    try:
+        weight =float(weight)
+    except(TypeError,ValueError):
         return "Weight must be a number."
 
     if weight < 20 or weight > 400:

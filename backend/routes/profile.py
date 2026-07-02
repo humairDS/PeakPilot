@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from database.db import db
 from models.user import User
+from utils.validators import validate_profile
 
 profile_bp = Blueprint("profile", __name__)
 
@@ -9,15 +10,25 @@ profile_bp = Blueprint("profile", __name__)
 @jwt_required()
 def save_profile():
 
-    user_id = get_jwt_identity()
-
     data = request.get_json()
+
+    error = validate_profile(data["profile"])
+
+    if error:
+        return jsonify({
+            "success":False,
+            "message":error
+        }),400
+    
+    user_id = get_jwt_identity()
+    
 
     profile = User.query.get(user_id)
 
     if profile is None:
         return jsonify({
-            "error": "User not found"
+            "success":False,
+            "message": "User not found"
         }), 404
 
 
@@ -40,7 +51,8 @@ def save_profile():
     db.session.commit()
 
     return jsonify({
-        "success": True
+        "success": True,
+        "message":"user saved successfully"
     })
 
 
@@ -54,10 +66,16 @@ def get_profile():
 
     if profile is None:
         return jsonify({
-            "exists": False
+            "success":False,
+            "message":"Profile not found.",
+            "data":{
+                "exists": False
+            }
         })
 
     return jsonify({
+        "success":True,
+        "message":"Profile retrieves successfully",
         "exists": True,
         "profile": {
             "age": profile.age,

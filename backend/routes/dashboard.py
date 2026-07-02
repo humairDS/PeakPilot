@@ -5,6 +5,8 @@ import json
 from models.user import User
 from models.plan import Plan
 from models.progress import Progress
+from models.meal_plan import MealPlan
+
 from datetime import datetime ,timedelta
 
 dashboard_bp = Blueprint("dashboard",__name__)
@@ -237,6 +239,13 @@ def dashboard():
             "earned": False
         })
 
+    latest_meal = (
+        MealPlan.query
+        .filter_by(user_id=user_id)
+        .order_by(MealPlan.created_at.desc())
+        .first()
+    )
+
     return jsonify({
         "profile": {
             "first_name": user.first_name,
@@ -301,5 +310,11 @@ def dashboard():
             "completion_rate": completion_rate,
             "current_streak":current_streak,
             "goal_progress":goal_progress
-        }
+        },
+
+        "latest_meal": (
+            json.loads(latest_meal.meal_json)
+            if latest_meal
+            else []
+        ),
     })

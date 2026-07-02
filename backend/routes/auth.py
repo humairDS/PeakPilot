@@ -70,6 +70,7 @@ def register():
 
     if User.query.filter_by(username=username).first():
         return jsonify({
+            "success":False,
             "error": "Username already exists."
         }), 409
 
@@ -102,6 +103,7 @@ def register():
         )
 
         return jsonify({
+            "success":True,
 
             "message": "Registration successful.",
 
@@ -152,6 +154,7 @@ def login():
 
     if user is None:
         return jsonify({
+            "success":False,
             "error": "Invalid email or password."
         }), 401
 
@@ -167,13 +170,16 @@ def login():
     )
 
     return jsonify({
+        "success":True,
         "message": "Login successful",
-        "access_token": access_token,
-        "user": {
-            "id": user.id,
-            "first_name": user.first_name,
-            "last_name": user.last_name,
-            "email": user.email
+        "data":{
+            "access_token": access_token,
+            "user": {
+                "id": user.id,
+                "first_name": user.first_name,
+                "last_name": user.last_name,
+                "email": user.email
+            }
         }
     }), 200
 
@@ -192,6 +198,7 @@ def me():
 
     if user is None:
         return jsonify({
+            "success":False,
             "error": "User not found."
         }), 404
 

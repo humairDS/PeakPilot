@@ -170,3 +170,29 @@ def regenerate_meal():
         return jsonify({
             "error": str(e)
         }), 500
+    
+
+from flask import jsonify, request
+from flask_jwt_extended import get_jwt_identity, verify_jwt_in_request
+
+@ai_bp.route("/latest-meal-plan", methods=["GET", "OPTIONS"])
+def latest_meal_plan():
+    # Let browser preflight succeed
+    if request.method == "OPTIONS":
+        return jsonify({"ok": True}), 200
+
+    # Check JWT only for the real GET request
+    verify_jwt_in_request()
+    user_id = int(get_jwt_identity())
+
+    latest_meal = (
+        MealPlan.query
+        .filter_by(user_id=user_id)
+        .order_by(MealPlan.created_at.desc())
+        .first()
+    )
+
+    if not latest_meal:
+        return jsonify({"meal_plan": []}), 200
+
+    return jsonify(json.loads(latest_meal.meal_json)), 200

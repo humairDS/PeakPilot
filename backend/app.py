@@ -23,7 +23,12 @@ app = Flask(
     __name__,
     template_folder=os.path.join(BASE_DIR, "../frontend/templates")
 )
-CORS(app)
+CORS(
+    app,
+    resources={r"/*": {"origins": "http://localhost:5173"}},
+    supports_credentials=True,
+    allow_headers=["Content-Type", "Authorization"]
+)
 
 # =========================
 # CONFIGURATION
