@@ -1,3 +1,4 @@
+import "./App.css";
 import {
   BrowserRouter,
   Routes,
@@ -9,7 +10,9 @@ import Meal from "./pages/Meal";
 import Workout from "./pages/Workout";
 import Progress from "./pages/Progress";
 import Profile from "./pages/Profile";
+import ModelPerformance from "./pages/ModelPerformance";
 import Login from "./pages/Login";
+import Register from "./pages/Register";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -17,6 +20,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
 
         <Route
           path="/"
@@ -59,6 +63,15 @@ function App() {
           element={
             <ProtectedRoute>
               <Profile />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/model-performance"
+          element={
+            <ProtectedRoute>
+              <ModelPerformance />
             </ProtectedRoute>
           }
         />

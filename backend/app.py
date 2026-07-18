@@ -10,6 +10,7 @@ from routes.ai import ai_bp
 from routes.progress_routes import progress_bp
 from routes.dashboard import dashboard_bp
 from routes.meal_plan import meal_plan_bp
+from routes.ml_routes import ml_bp
 
 
 
@@ -54,6 +55,7 @@ app.register_blueprint(ai_bp)
 app.register_blueprint(progress_bp)
 app.register_blueprint(dashboard_bp)
 app.register_blueprint(meal_plan_bp)
+app.register_blueprint(ml_bp)
 # =========================
 # ROUTES
 # =========================

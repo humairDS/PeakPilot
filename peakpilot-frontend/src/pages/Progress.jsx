@@ -1,10 +1,14 @@
 import { useEffect, useState } from "react";
 import Layout from "../components/layout/Layout";
 import { getProgress, addProgress } from "../services/progress";
+import { getDashboard } from "../services/dashboard";
 
 function Progress() {
+  const [sidebarProfile, setSidebarProfile] = useState(null);
   const [progressEntries, setProgressEntries] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [statusMsg, setStatusMsg] = useState(null);
 
   const [formData, setFormData] = useState({
     weight: "",
@@ -13,13 +17,21 @@ function Progress() {
     water: "",
     energy: "",
     workout_completed: false,
-    notes: ""
+    notes: "",
   });
 
   const fetchProgressData = async () => {
     try {
-      const progressData = await getProgress();
+      const [progressData, dashboardData] = await Promise.all([
+        getProgress(),
+        getDashboard().catch(() => null),
+      ]);
+
       setProgressEntries(progressData || []);
+
+      if (dashboardData?.profile) {
+        setSidebarProfile(dashboardData.profile);
+      }
     } catch (error) {
       console.error("Progress fetch failed:", error);
     } finally {
@@ -35,25 +47,14 @@ function Progress() {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-
-  const payload = {
-    weight: formData.weight === "" ? null : parseFloat(formData.weight),
-    body_fat: formData.body_fat === "" ? null : parseFloat(formData.body_fat),
-    sleep: formData.sleep === "" ? null : parseFloat(formData.sleep),
-    water: formData.water === "" ? null : parseFloat(formData.water),
-    energy: formData.energy === "" ? null : parseInt(formData.energy, 10),
-    workout_completed: formData.workout_completed,
-    notes: formData.notes?.trim() || null
-  };
-
-  console.log("Submitting progress payload:", payload);
+    setStatusMsg(null);
+    setSaving(true);
 
     try {
       await addProgress(formData);
@@ -65,143 +66,231 @@ function Progress() {
         water: "",
         energy: "",
         workout_completed: false,
-        notes: ""
+        notes: "",
       });
 
       await fetchProgressData();
-      alert("Progress added successfully");
+      setStatusMsg({ type: "success", text: "Progress entry saved." });
     } catch (error) {
       console.error("Add progress failed:", error);
-      console.log("Backend error response:",error?.response?.data);
-      alert("Failed to add progress");
+      console.log("Backend error response:", error?.response?.data);
+      setStatusMsg({
+        type: "error",
+        text: "Failed to save your progress entry. Please try again.",
+      });
+    } finally {
+      setSaving(false);
     }
   };
 
   if (loading) {
     return (
-      <Layout>
-        <h1>Loading progress...</h1>
+      <Layout profile={sidebarProfile}>
+        <div className="dashboard-loading">
+          <div className="loading-card">
+            <h2>Loading your progress...</h2>
+          </div>
+        </div>
       </Layout>
     );
   }
 
   return (
-    <Layout>
+    <Layout profile={sidebarProfile}>
       <div className="page-header">
-        <h1>Progress Tracker</h1>
-        <p>Track your fitness journey and daily progress.</p>
+        <div className="page-title-block">
+          <h1>Progress Tracker</h1>
+          <p>Log your daily stats to track trends and unlock achievements.</p>
+        </div>
       </div>
 
-      <div className="card mb-2">
-        <h3 className="mb-2">Add Progress Entry</h3>
-
-        <form onSubmit={handleSubmit}>
-          <div className="grid-2 mb-2">
+      <div className="progress-card mb-3">
+        <div className="panel-body">
+          <div className="panel-header">
             <div>
-              <label>Weight (kg)</label>
-              <input
-                type="number"
-                step="0.1"
-                name="weight"
-                value={formData.weight}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            <div>
-              <label>Body Fat %</label>
-              <input
-                type="number"
-                step="0.1"
-                name="body_fat"
-                value={formData.body_fat}
-                onChange={handleChange}
-              />
-            </div>
-
-            <div>
-              <label>Sleep (hours)</label>
-              <input
-                type="number"
-                step="0.1"
-                name="sleep"
-                value={formData.sleep}
-                onChange={handleChange}
-              />
-            </div>
-
-            <div>
-              <label>Water (liters)</label>
-              <input
-                type="number"
-                step="0.1"
-                name="water"
-                value={formData.water}
-                onChange={handleChange}
-              />
-            </div>
-
-            <div>
-              <label>Energy (1–10)</label>
-              <input
-                type="number"
-                name="energy"
-                value={formData.energy}
-                onChange={handleChange}
-              />
-            </div>
-
-            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginTop: "28px" }}>
-              <input
-                type="checkbox"
-                name="workout_completed"
-                checked={formData.workout_completed}
-                onChange={handleChange}
-              />
-              <label>Workout Completed</label>
+              <h3 className="panel-title">Add Progress Entry</h3>
+              <p className="panel-subtitle">
+                A quick daily check-in — only weight is required.
+              </p>
             </div>
           </div>
 
-          <div className="mb-2">
-            <label>Notes</label>
-            <textarea
-              name="notes"
-              rows="4"
-              value={formData.notes}
-              onChange={handleChange}
-            />
-          </div>
+          {statusMsg && (
+            <div className={`inline-alert ${statusMsg.type}`}>
+              {statusMsg.text}
+            </div>
+          )}
 
-          <button type="submit" className="btn btn-primary">
-            Save Progress
-          </button>
-        </form>
+          <form onSubmit={handleSubmit}>
+            <div className="form-grid-3 mb-3">
+              <div className="form-group">
+                <label>Weight (kg)</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  name="weight"
+                  value={formData.weight}
+                  onChange={handleChange}
+                  placeholder="e.g. 80.5"
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Body Fat %</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  name="body_fat"
+                  value={formData.body_fat}
+                  onChange={handleChange}
+                  placeholder="e.g. 18.5"
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Sleep (hours)</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  name="sleep"
+                  value={formData.sleep}
+                  onChange={handleChange}
+                  placeholder="e.g. 7"
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Water (liters)</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  name="water"
+                  value={formData.water}
+                  onChange={handleChange}
+                  placeholder="e.g. 2.5"
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Energy (1–10)</label>
+                <input
+                  type="number"
+                  min="1"
+                  max="10"
+                  name="energy"
+                  value={formData.energy}
+                  onChange={handleChange}
+                  placeholder="e.g. 7"
+                />
+              </div>
+
+              <div className="checkbox-row">
+                <input
+                  type="checkbox"
+                  id="workout_completed"
+                  name="workout_completed"
+                  checked={formData.workout_completed}
+                  onChange={handleChange}
+                />
+                <label htmlFor="workout_completed" style={{ margin: 0 }}>
+                  Workout Completed Today
+                </label>
+              </div>
+            </div>
+
+            <div className="form-group mb-3">
+              <label>Notes</label>
+              <textarea
+                name="notes"
+                rows="4"
+                value={formData.notes}
+                onChange={handleChange}
+                placeholder="How did today feel? Any soreness, wins, or setbacks?"
+              />
+            </div>
+
+            <div className="form-actions">
+              <button type="submit" className="primary-btn" disabled={saving}>
+                {saving ? "Saving..." : "Save Progress"}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
 
-      <div className="card">
-        <h3 className="mb-2">Progress History</h3>
-
-        {progressEntries.length === 0 ? (
-          <p>No progress entries yet.</p>
-        ) : (
-          progressEntries.map((entry, index) => (
-            <div
-              key={index}
-              className="card"
-              style={{ marginBottom: "12px", background: "var(--surface2)" }}
-            >
-              <p><strong>Date:</strong> {entry.created_at || "N/A"}</p>
-              <p><strong>Weight:</strong> {entry.weight ?? "N/A"} kg</p>
-              <p><strong>Body Fat:</strong> {entry.body_fat ?? "N/A"}%</p>
-              <p><strong>Sleep:</strong> {entry.sleep ?? "N/A"} hrs</p>
-              <p><strong>Water:</strong> {entry.water ?? "N/A"} L</p>
-              <p><strong>Energy:</strong> {entry.energy ?? "N/A"}/10</p>
-              <p><strong>Workout Completed:</strong> {entry.workout_completed ? "Yes" : "No"}</p>
-              <p><strong>Notes:</strong> {entry.notes || "—"}</p>
+      <div className="progress-card">
+        <div className="panel-body">
+          <div className="panel-header">
+            <div>
+              <h3 className="panel-title">Progress History</h3>
+              <p className="panel-subtitle">
+                Your most recent entries, newest first.
+              </p>
             </div>
-          ))
-        )}
+            <div className="badge badge-brand">{progressEntries.length} entries</div>
+          </div>
+
+          {progressEntries.length === 0 ? (
+            <div className="empty-state">
+              No progress entries yet — add your first one above.
+            </div>
+          ) : (
+            <div className="list-stack">
+              {progressEntries.map((entry, index) => (
+                <div key={index} className="list-item">
+                  <div className="entry-stat-grid">
+                    <div className="entry-stat">
+                      <div className="entry-stat-label">Weight</div>
+                      <div className="entry-stat-value">{entry.weight ?? "—"} kg</div>
+                    </div>
+                    <div className="entry-stat">
+                      <div className="entry-stat-label">Body Fat</div>
+                      <div className="entry-stat-value">
+                        {entry.body_fat != null ? `${entry.body_fat}%` : "—"}
+                      </div>
+                    </div>
+                    <div className="entry-stat">
+                      <div className="entry-stat-label">Sleep</div>
+                      <div className="entry-stat-value">
+                        {entry.sleep != null ? `${entry.sleep}h` : "—"}
+                      </div>
+                    </div>
+                    <div className="entry-stat">
+                      <div className="entry-stat-label">Water</div>
+                      <div className="entry-stat-value">
+                        {entry.water != null ? `${entry.water}L` : "—"}
+                      </div>
+                    </div>
+                    <div className="entry-stat">
+                      <div className="entry-stat-label">Energy</div>
+                      <div className="entry-stat-value">
+                        {entry.energy != null ? `${entry.energy}/10` : "—"}
+                      </div>
+                    </div>
+                  </div>
+
+                  {entry.notes && (
+                    <p style={{ color: "var(--text-soft)", margin: "10px 0 0" }}>
+                      {entry.notes}
+                    </p>
+                  )}
+
+                  <div className="entry-footer">
+                    <span>{entry.created_at || "N/A"}</span>
+                    <span
+                      className={`badge ${
+                        entry.workout_completed ? "badge-success" : "badge-warning"
+                      }`}
+                    >
+                      {entry.workout_completed ? "Workout Done" : "No Workout"}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </Layout>
   );

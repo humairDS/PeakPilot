@@ -7,9 +7,25 @@ from models.plan import Plan
 from models.progress import Progress
 from models.meal_plan import MealPlan
 
-from datetime import datetime ,timedelta
+from datetime import datetime, timedelta
 
-dashboard_bp = Blueprint("dashboard",__name__)
+dashboard_bp = Blueprint("dashboard", __name__)
+
+
+def build_greeting(first_name):
+    hour = datetime.utcnow().hour
+
+    if hour < 12:
+        time_of_day = "Good morning"
+    elif hour < 18:
+        time_of_day = "Good afternoon"
+    else:
+        time_of_day = "Good evening"
+
+    name = first_name or "Athlete"
+
+    return f"{time_of_day}, {name} \U0001F44B"
+
 
 @dashboard_bp.route("/dashboard", methods=["GET"])
 @jwt_required()
@@ -61,8 +77,7 @@ def dashboard():
             expected_date = progress_date - timedelta(days=1)
 
         else:
-            break 
-
+            break
 
     week_start = datetime.utcnow() - timedelta(days=7)
 
@@ -85,31 +100,27 @@ def dashboard():
     average_sleep = 0
 
     if weekly_progress:
-        average_sleep = round(
-            sum(p.sleep for p in weekly_progress if p.sleep is not None)
-            / len([p for p in weekly_progress if p.sleep is not None]),
-            1
-        )
+        sleep_entries = [p.sleep for p in weekly_progress if p.sleep is not None]
+        if sleep_entries:
+            average_sleep = round(sum(sleep_entries) / len(sleep_entries), 1)
 
     average_water = 0
 
     if weekly_progress:
-        average_water = round(
-            sum(p.water for p in weekly_progress if p.water is not None)
-            / len([p for p in weekly_progress if p.water is not None]),
-        )
+        water_entries = [p.water for p in weekly_progress if p.water is not None]
+        if water_entries:
+            average_water = round(sum(water_entries) / len(water_entries), 1)
 
-    average_energy = 0 
+    average_energy = 0
 
     if weekly_progress:
-        average_energy = round(
-            sum(p.energy for p in weekly_progress if p.energy is not None)
-            /len ([p for p in weekly_progress if p.energy is not None]),
-        )
+        energy_entries = [p.energy for p in weekly_progress if p.energy is not None]
+        if energy_entries:
+            average_energy = round(sum(energy_entries) / len(energy_entries))
 
-    weekly_weight_change = 0 
-    
-    if len(weekly_progress)>=2:
+    weekly_weight_change = 0
+
+    if len(weekly_progress) >= 2:
 
         oldest = weekly_progress[0]
         newest = weekly_progress[-1]
@@ -118,8 +129,6 @@ def dashboard():
             newest.weight - oldest.weight,
             1
         )
-
-
 
     plans_generated = Plan.query.filter_by(user_id=user_id).count()
 
@@ -133,7 +142,6 @@ def dashboard():
         )
         .count()
     )
-
 
     first_progress = (
         Progress.query
@@ -183,7 +191,6 @@ def dashboard():
             )
 
             goal_progress = min(goal_progress, 100)
-
 
     achievements = []
 
@@ -247,6 +254,8 @@ def dashboard():
     )
 
     return jsonify({
+        "greeting": build_greeting(user.first_name),
+
         "profile": {
             "first_name": user.first_name,
             "last_name": user.last_name,
@@ -267,13 +276,13 @@ def dashboard():
             "water": user.water
         },
 
-        "latest_plan":(
+        "latest_plan": (
             json.loads(latest_plan.plan_json)
             if latest_plan
             else None
         ),
 
-        "latest_progress":(
+        "latest_progress": (
             {
                 "weight": latest_progress.weight,
                 "body_fat": latest_progress.body_fat,
@@ -286,7 +295,6 @@ def dashboard():
             }
             if latest_progress
             else None
-            
         ),
 
         "weekly_summary": {
@@ -297,7 +305,7 @@ def dashboard():
             "weight_change": weekly_weight_change
         },
 
-        "achievements":achievements,
+        "achievements": achievements,
 
         "statistics": {
             "plans_generated": plans_generated,
@@ -305,11 +313,11 @@ def dashboard():
             "current_weight": current_weight,
             "goal_weight": goal_weight,
             "weight_remaining": weight_remaining,
-            "weight_change":weight_change,
+            "weight_change": weight_change,
             "completed_workouts": completed_workouts,
             "completion_rate": completion_rate,
-            "current_streak":current_streak,
-            "goal_progress":goal_progress
+            "current_streak": current_streak,
+            "goal_progress": goal_progress
         },
 
         "latest_meal": (

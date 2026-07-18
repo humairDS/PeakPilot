@@ -1,0 +1,32 @@
+{
+  "calorie_model": {
+    "type": "RandomForestRegressor",
+    "mae": 138.86,
+    "r2_score": 0.9159,
+    "test_samples": 1200
+  },
+  "intensity_model": {
+    "type": "RandomForestClassifier",
+    "accuracy": 0.8,
+    "f1_macro": 0.7706,
+    "test_samples": 1200,
+    "classes": [
+      "High",
+      "Low",
+      "Moderate"
+    ]
+  },
+  "feature_columns": [
+    "age",
+    "height",
+    "weight",
+    "goal_weight",
+    "workout_days",
+    "sleep",
+    "water",
+    "gender",
+    "goal",
+    "activity"
+  ],
+  "training_samples": 6000
+}
