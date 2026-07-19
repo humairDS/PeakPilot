@@ -1,7 +1,10 @@
 import axios from "axios";
 
+// In production, set VITE_API_URL in your hosting provider's environment
+// variables (e.g. Vercel project settings) to your deployed backend URL.
+// Locally, it falls back to your Flask dev server.
 const api = axios.create({
-  baseURL: "http://127.0.0.1:5000"
+  baseURL: import.meta.env.VITE_API_URL || "http://127.0.0.1:5000"
 });
 
 // Attach token to every request
