@@ -1,3 +1,16 @@
+/* =========================================================
+   PEAKPILOT — FULL APP CSS (PREMIUM DARK UI)
+   Rebuilt for:
+   - App.jsx routes
+   - Layout.jsx
+   - Sidebar.jsx
+   - Dashboard.jsx
+   - Meal / Workout / Progress / Profile / Auth pages
+========================================================= */
+
+/* ------------------------------
+   ROOT / THEME
+------------------------------ */
 :root {
   --bg: #07111f;
   --bg-elevated: #0c1728;
