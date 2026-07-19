@@ -10,3 +10,5 @@ python-dotenv
 openai
 google-genai
 Flask-Migrate
+gunicorn
+psycopg2-binary
