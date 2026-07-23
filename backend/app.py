@@ -26,7 +26,13 @@ app = Flask(
 )
 CORS(
     app,
-    resources={r"/*": {"origins": "http://localhost:5173"}},
+    resources={r"/*": {
+        "origins": [
+            "https://peak-pilot-nu.vercel.app",
+            "http://localhost:5173",
+            "http://localhost:3000"
+        ]
+    }},
     supports_credentials=True,
     allow_headers=["Content-Type", "Authorization"]
 )
