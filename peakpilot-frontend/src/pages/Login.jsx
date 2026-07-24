@@ -7,78 +7,76 @@ function Login() {
 
   const [formData, setFormData] = useState({
     email: "",
-    password: ""
+    password: "",
   });
 
   const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setErrorMsg(null);
 
     try {
       setLoading(true);
 
       const res = await loginUser(formData);
-
       localStorage.setItem("token", res.data.access_token);
 
       navigate("/");
     } catch (err) {
       console.error("Login failed:", err);
-      alert(err?.response?.data?.error || "Login failed");
+      setErrorMsg(err?.response?.data?.error || "Login failed. Please check your details.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
-      <div className="card p-8 w-full max-w-md">
-        <h1 className="text-3xl font-bold mb-2">Login</h1>
-        <p className="mb-6 opacity-80">Welcome back to PeakPilot</p>
+    <div className="auth-shell">
+      <div className="auth-card">
+        <h1>Welcome back</h1>
+        <p>Log in to continue your PeakPilot journey.</p>
 
-        <form onSubmit={handleLogin}>
-          <input
-            type="email"
-            name="email"
-            className="input mb-4 w-full"
-            placeholder="Email"
-            value={formData.email}
-            onChange={handleChange}
-          />
+        {errorMsg && <div className="inline-alert error" style={{ marginTop: "20px" }}>{errorMsg}</div>}
 
-          <input
-            type="password"
-            name="password"
-            className="input mb-6 w-full"
-            placeholder="Password"
-            value={formData.password}
-            onChange={handleChange}
-          />
+        <form className="auth-form" onSubmit={handleLogin}>
+          <div className="form-group">
+            <label>Email</label>
+            <input
+              type="email"
+              name="email"
+              placeholder="you@example.com"
+              value={formData.email}
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-          <button
-            type="submit"
-            className="btn btn-primary w-full"
-            disabled={loading}
-          >
+          <div className="form-group">
+            <label>Password</label>
+            <input
+              type="password"
+              name="password"
+              placeholder="Your password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
+          <button type="submit" className="primary-btn" disabled={loading}>
             {loading ? "Logging in..." : "Login"}
           </button>
         </form>
 
-        <p className="mt-6 text-sm opacity-80 text-center">
-          Don’t have an account?{" "}
-          <Link to="/register" className="font-semibold">
-            Register
-          </Link>
+        <p className="auth-footer">
+          Don't have an account? <Link to="/register">Register</Link>
         </p>
       </div>
     </div>
