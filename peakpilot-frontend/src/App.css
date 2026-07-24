@@ -596,6 +596,18 @@ textarea {
   transition: border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
 }
 
+/* Without this, browsers render the dropdown list using the OS's native
+   light/dark theme instead of our app colors, making option text unreadable
+   in some browser/OS combinations regardless of our custom styling above. */
+select {
+  color-scheme: dark;
+}
+
+option {
+  background: var(--bg-elevated);
+  color: var(--text);
+}
+
 input::placeholder,
 textarea::placeholder {
   color: var(--text-muted);
