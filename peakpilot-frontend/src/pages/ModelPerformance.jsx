@@ -85,6 +85,13 @@ function ModelPerformance() {
         </div>
       </div>
 
+      <div className="inline-alert success" style={{ marginBottom: "24px" }}>
+        These metrics describe the trained model itself, not any individual
+        account — every user sees the same numbers here, since it's one
+        shared model serving all accounts. Your personal prediction (calorie
+        target and workout intensity) is on your Dashboard instead.
+      </div>
+
       <div className="metrics-grid">
         <div className="metric-card">
           <div className="metric-top">
