@@ -10,108 +10,114 @@ function Register() {
     last_name: "",
     username: "",
     email: "",
-    password: ""
+    password: "",
   });
 
   const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleRegister = async (e) => {
     e.preventDefault();
+    setErrorMsg(null);
 
     try {
       setLoading(true);
 
       const res = await registerUser(formData);
-
       localStorage.setItem("token", res.data?.access_token || res.access_token);
 
-      alert("Registration successful");
       navigate("/");
     } catch (err) {
       console.error("Register failed:", err);
-      alert(err?.response?.data?.error || "Registration failed");
+      setErrorMsg(err?.response?.data?.error || "Registration failed. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
-      <div className="card p-8 w-full max-w-md">
-        <h1 className="text-3xl font-bold mb-2">Create Account</h1>
-        <p className="mb-6 opacity-80">Start your PeakPilot journey</p>
+    <div className="auth-shell">
+      <div className="auth-card">
+        <h1>Create your account</h1>
+        <p>Start your PeakPilot journey today.</p>
 
-        <form onSubmit={handleRegister}>
-          <div className="grid grid-cols-2 gap-3 mb-4">
+        {errorMsg && <div className="inline-alert error" style={{ marginTop: "20px" }}>{errorMsg}</div>}
+
+        <form className="auth-form" onSubmit={handleRegister}>
+          <div className="form-grid">
+            <div className="form-group">
+              <label>First Name</label>
+              <input
+                type="text"
+                name="first_name"
+                placeholder="First name"
+                value={formData.first_name}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Last Name</label>
+              <input
+                type="text"
+                name="last_name"
+                placeholder="Last name"
+                value={formData.last_name}
+                onChange={handleChange}
+                required
+              />
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label>Username</label>
             <input
               type="text"
-              name="first_name"
-              className="input w-full"
-              placeholder="First name"
-              value={formData.first_name}
+              name="username"
+              placeholder="Choose a username"
+              value={formData.username}
               onChange={handleChange}
-            />
-
-            <input
-              type="text"
-              name="last_name"
-              className="input w-full"
-              placeholder="Last name"
-              value={formData.last_name}
-              onChange={handleChange}
+              required
             />
           </div>
 
-          <input
-            type="text"
-            name="username"
-            className="input mb-4 w-full"
-            placeholder="Username"
-            value={formData.username}
-            onChange={handleChange}
-          />
+          <div className="form-group">
+            <label>Email</label>
+            <input
+              type="email"
+              name="email"
+              placeholder="you@example.com"
+              value={formData.email}
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-          <input
-            type="email"
-            name="email"
-            className="input mb-4 w-full"
-            placeholder="Email"
-            value={formData.email}
-            onChange={handleChange}
-          />
+          <div className="form-group">
+            <label>Password</label>
+            <input
+              type="password"
+              name="password"
+              placeholder="Create a password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-          <input
-            type="password"
-            name="password"
-            className="input mb-6 w-full"
-            placeholder="Password"
-            value={formData.password}
-            onChange={handleChange}
-          />
-
-          <button
-            type="submit"
-            className="btn btn-primary w-full"
-            disabled={loading}
-          >
+          <button type="submit" className="primary-btn" disabled={loading}>
             {loading ? "Creating account..." : "Register"}
           </button>
         </form>
 
-        <p className="mt-6 text-sm opacity-80 text-center">
-          Already have an account?{" "}
-          <Link to="/login" className="font-semibold">
-            Login
-          </Link>
+        <p className="auth-footer">
+          Already have an account? <Link to="/login">Login</Link>
         </p>
       </div>
     </div>
