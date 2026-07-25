@@ -291,7 +291,7 @@ def dashboard():
                 "energy": latest_progress.energy,
                 "workout_completed": latest_progress.workout_completed,
                 "notes": latest_progress.notes,
-                "created_at": latest_progress.created_at.strftime("%Y-%m-%d %H:%M")
+                "created_at": latest_progress.created_at.isoformat() + "Z"
             }
             if latest_progress
             else None
