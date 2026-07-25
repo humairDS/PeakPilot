@@ -277,7 +277,14 @@ function Progress() {
                   )}
 
                   <div className="entry-footer">
-                    <span>{entry.created_at || "N/A"}</span>
+                    <span>
+                      {entry.created_at
+                        ? new Date(entry.created_at).toLocaleString(undefined, {
+                            dateStyle: "medium",
+                            timeStyle: "short",
+                          })
+                        : "N/A"}
+                    </span>
                     <span
                       className={`badge ${
                         entry.workout_completed ? "badge-success" : "badge-warning"
