@@ -1,12 +1,21 @@
 import json
 import os
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
 from google import genai
 from models.progress import Progress
 
-load_dotenv(".env")   # or just load_dotenv() if your .env is in the root
+load_dotenv(find_dotenv(usecwd=False))   # searches upward from this file's own location (backend/services -> backend -> project root), regardless of where the app is launched from
 
-client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+_client = None
+
+def get_client():
+    """Lazily creates the Gemini client on first actual use, rather than at
+    import time — this keeps server startup/cold-start fast, since this
+    module gets re-imported every time a sleeping free-tier instance wakes up."""
+    global _client
+    if _client is None:
+        _client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+    return _client
 
 def generate_plan(user,progress):
     progress_text = ""
@@ -39,6 +48,7 @@ def generate_plan(user,progress):
     - Workout Days Per Week: {user.workout_days}
     - Preferred Workout Type: {user.workout_type}
     - Workout Duration: {user.duration} minutes
+    - Available Equipment: {user.equipment or "not specified — assume bodyweight only"}
     - Diet Preference: {user.diet}
     - Medical Conditions: {user.conditions}
     - Average Sleep: {user.sleep} hours
@@ -48,6 +58,7 @@ def generate_plan(user,progress):
     - Create exactly {user.workout_days} workout days.
     - Match the user's fitness goal.
     - Match the preferred workout type.
+    - Only include exercises that can be performed with the user's available equipment.
     - Each workout should fit within {user.duration} minutes.
     - Include warm-up and cool-down.
     - Include sets, reps and rest time.
@@ -84,7 +95,7 @@ def generate_plan(user,progress):
     }}
     """
 
-    response = client.models.generate_content(
+    response = get_client().models.generate_content(
         model="gemini-2.5-flash",
         contents=prompt,
         config={
@@ -137,6 +148,7 @@ def regenerate_plan(user, progress):
     - Workout Days Per Week: {user.workout_days}
     - Preferred Workout Type: {user.workout_type}
     - Workout Duration: {user.duration} minutes
+    - Available Equipment: {user.equipment or "not specified — assume bodyweight only"}
     - Diet Preference: {user.diet}
     - Medical Conditions: {user.conditions}
 
@@ -152,6 +164,7 @@ def regenerate_plan(user, progress):
     - Consider weight changes.
     - Keep the same fitness goal unless progress clearly suggests adjustments.
     - Keep workouts within {user.duration} minutes.
+    - Only include exercises that can be performed with the user's available equipment.
     - Create exactly {user.workout_days} workout days.
     - Include warm-up and cool-down.
     - Include sets, reps and rest time.
@@ -185,7 +198,7 @@ def regenerate_plan(user, progress):
     }}
     """
 
-    response = client.models.generate_content(
+    response = get_client().models.generate_content(
         model="gemini-2.5-flash",
         contents=prompt,
         config={
@@ -258,7 +271,7 @@ def generate_meal_plan(user):
     }}
     """
 
-    response = client.models.generate_content(
+    response = get_client().models.generate_content(
         model="gemini-2.5-flash",
         contents=prompt,
         config={
@@ -348,7 +361,7 @@ def regenerate_meal_plan(user, progress):
     }}
     """
 
-    response = client.models.generate_content(
+    response = get_client().models.generate_content(
         model="gemini-2.5-flash",
         contents=prompt,
         config={
