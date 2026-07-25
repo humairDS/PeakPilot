@@ -38,6 +38,10 @@ class User(db.Model):
     sleep = db.Column(db.Float)
     water = db.Column(db.Float)
 
+    # Home / gym / bodyweight-only — lets plan generation tailor exercises
+    # to what the user can actually access.
+    equipment = db.Column(db.String(50))
+
     # Stores the generated AI plan as JSON text
     plan = db.Column(db.Text)
 
