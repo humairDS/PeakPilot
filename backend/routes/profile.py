@@ -46,6 +46,7 @@ def save_profile():
     profile.conditions = data["profile"]["conditions"]
     profile.sleep = data["profile"]["sleep"]
     profile.water = data["profile"]["water"]
+    profile.equipment = data["profile"].get("equipment")
 
 
     db.session.commit()
@@ -91,6 +92,7 @@ def get_profile():
             "diet": profile.diet,
             "conditions": profile.conditions,
             "sleep": profile.sleep,
-            "water": profile.water
+            "water": profile.water,
+            "equipment": profile.equipment
         },
     })
