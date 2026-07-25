@@ -26,13 +26,10 @@ app = Flask(
 )
 CORS(
     app,
-    resources={r"/*": {
-        "origins": [
-            "https://peak-pilot-nu.vercel.app",
-            "http://localhost:5173",
-            "http://localhost:3000"
-        ]
-    }},
+    resources={r"/*": {"origins": [
+        "http://localhost:5173",
+        os.environ.get("FRONTEND_URL", "http://localhost:5173"),
+    ]}},
     supports_credentials=True,
     allow_headers=["Content-Type", "Authorization"]
 )
@@ -90,6 +87,22 @@ with app.app_context():
     from models.progress import Progress
     from models.meal_plan import MealPlan 
     db.create_all()
+
+    # --- One-time auto-migration: adds columns that db.create_all() can't add
+    # to an already-existing table. Safe to leave here permanently — it checks
+    # first and does nothing once the column already exists. This runs on every
+    # boot automatically, so it needs no manual shell/terminal access (useful
+    # since Render's free tier doesn't include Shell access).
+    from sqlalchemy import text, inspect
+
+    inspector = inspect(db.engine)
+    existing_user_columns = [col["name"] for col in inspector.get_columns("users")]
+
+    if "equipment" not in existing_user_columns:
+        with db.engine.connect() as conn:
+            conn.execute(text("ALTER TABLE users ADD COLUMN equipment VARCHAR(50)"))
+            conn.commit()
+        print("Auto-migration: added 'equipment' column to 'users' table.")
 
 # =========================
 # RUN SERVER
