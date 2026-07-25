@@ -93,7 +93,7 @@ def get_progress():
 
     for p in progress:
         result.append({
-            "created_at": p.created_at.strftime("%Y-%m-%d %H:%M"),
+            "created_at": p.created_at.isoformat() + "Z",
             "weight": p.weight,
             "body_fat": p.body_fat,
             "sleep": p.sleep,
