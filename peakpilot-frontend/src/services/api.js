@@ -22,6 +22,8 @@ api.interceptors.request.use(
 );
 
 // Handle expired/invalid token globally
+let isRedirectingToLogin = false;
+
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -36,8 +38,16 @@ api.interceptors.response.use(
         msg === "Invalid header string"
       ) {
         localStorage.removeItem("token");
-        alert("Session expired. Please log in again.");
-        window.location.href = "/login";
+
+        // Multiple API calls can fail at once (e.g. Dashboard fires several
+        // requests in parallel) — without this guard, each one would
+        // separately trigger a redirect/popup, stacking up several alerts
+        // the user has to dismiss one by one.
+        if (!isRedirectingToLogin) {
+          isRedirectingToLogin = true;
+          sessionStorage.setItem("sessionExpiredMessage", "Your session expired. Please log in again.");
+          window.location.href = "/login";
+        }
       }
     }
 
