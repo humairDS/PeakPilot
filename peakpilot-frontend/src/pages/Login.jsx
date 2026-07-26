@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { loginUser } from "../services/auth";
 
@@ -12,6 +12,16 @@ function Login() {
 
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState(null);
+  const [infoMsg, setInfoMsg] = useState(null);
+
+  useEffect(() => {
+    const sessionExpiredMessage = sessionStorage.getItem("sessionExpiredMessage");
+
+    if (sessionExpiredMessage) {
+      setInfoMsg(sessionExpiredMessage);
+      sessionStorage.removeItem("sessionExpiredMessage");
+    }
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -43,6 +53,7 @@ function Login() {
         <h1>Welcome back</h1>
         <p>Log in to continue your PeakPilot journey.</p>
 
+        {infoMsg && <div className="inline-alert success" style={{ marginTop: "20px" }}>{infoMsg}</div>}
         {errorMsg && <div className="inline-alert error" style={{ marginTop: "20px" }}>{errorMsg}</div>}
 
         <form className="auth-form" onSubmit={handleLogin}>
