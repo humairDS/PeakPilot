@@ -94,6 +94,9 @@ def regenerate():
 
         plan = regenerate_plan(user, progress)
 
+        if isinstance(plan, dict) and "error" in plan:
+            return jsonify({"error": "The AI couldn't generate a valid workout plan. Please try again."}), 502
+
         new_plan = Plan(
             user_id = user.id,
             plan_json=json.dumps(plan)
@@ -152,6 +155,9 @@ def regenerate_meal():
         )
 
         meal_plan = regenerate_meal_plan(user, progress)
+
+        if isinstance(meal_plan, dict) and "error" in meal_plan:
+            return jsonify({"error": "The AI couldn't generate a valid meal plan. Please try again."}), 502
 
         new_meal = MealPlan(
             user_id=user.id,
