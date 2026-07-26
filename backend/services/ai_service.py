@@ -101,7 +101,8 @@ def generate_plan(user,progress):
         config={
             "response_mime_type": "application/json",
             "temperature": 0.2,
-            "max_output_tokens": 8192,
+            "max_output_tokens": 16384,
+            "thinking_config": {"thinking_budget": 0},
         }
     )
 
@@ -204,7 +205,8 @@ def regenerate_plan(user, progress):
         config={
             "response_mime_type": "application/json",
             "temperature": 0.2,
-            "max_output_tokens": 8192,
+            "max_output_tokens": 16384,
+            "thinking_config": {"thinking_budget": 0},
         }
     )
 
@@ -278,6 +280,7 @@ def generate_meal_plan(user):
             "response_mime_type": "application/json",
             "temperature": 0.2,
             "max_output_tokens": 16000,
+            "thinking_config": {"thinking_budget": 0},
         }
     )
 
@@ -368,6 +371,7 @@ def regenerate_meal_plan(user, progress):
             "response_mime_type": "application/json",
             "temperature": 0.2,
             "max_output_tokens": 16000,
+            "thinking_config": {"thinking_budget": 0},
         }
     )
 
